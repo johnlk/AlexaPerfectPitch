@@ -1,6 +1,7 @@
 'use strict';
 
 const Alexa = require('alexa-sdk');
+var Speech = require('ssml-builder');
 
 const GAME_STATES = {
     GAME: '_GAMEMODE', // Asking trivia questions.
@@ -27,10 +28,6 @@ const newSessionHandlers = {
     },
 };
 
-// function sayHello(){
-//     this.emit(':tell', "Hello there, my name is chief asshole");
-// }
-
 function handleUserGuess(userDoesntKnow){
     if(userDoesntKnow){
         //emit the answer
@@ -42,15 +39,18 @@ function handleUserGuess(userDoesntKnow){
 
 const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
     'StartGame': function (newGame) {
+
+        var speech = new Speech();
+        speech.audio('https://s3.amazonaws.com/pianonotes/A.mp3');
         
         Object.assign(this.attributes, {
-            'speechOutput': 'Hello, I\'m going to play a note and you just have to guess what it was.',
+            'speechOutput': 'Hello, here\'s a note.',
+            'audioClip': speech.ssml(true),
             'repromptText': 'Just guess a note'
         });
 
         this.handler.state = GAME_STATES.GAME;
-
-        this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
+        this.emit(':ask', this.attributes['speechOutput'] + this.attributes['audioClip'], this.attributes['repromptText']);
 
     },
 });
