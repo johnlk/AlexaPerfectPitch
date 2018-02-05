@@ -8,7 +8,12 @@ const GAME_STATES = {
     START: '_STARTMODE', // Entry point, start the game.
     // HELP: '_HELPMODE', // The user is asking for help.
 };
+
 const APP_ID = undefined; // TODO replace with your app ID (OPTIONAL)
+
+var clips = require('./clips').clips;
+
+var score = 0;
 
 const newSessionHandlers = {
     'LaunchRequest': function () {
@@ -34,7 +39,14 @@ function handleUserGuess(userDoesntKnow){
         return;
     }
     var userAnswer = this.event.request.intent.slots.Answer.value;
-    this.emit(':tell', 'You answered ' + userAnswer);
+
+    if(userAnswer.toLowerCase() == clips[0].answer.toLowerCase()){
+        this.emit(':tell', 'You\'re right!');
+        score++;
+    }else{
+        this.emit(':tell', 'Sorry. It was actually a ' + clips[0].answer);
+    }
+
 }
 
 const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
@@ -50,7 +62,8 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
         });
 
         this.handler.state = GAME_STATES.GAME;
-        this.emit(':ask', this.attributes['speechOutput'] + this.attributes['audioClip'], this.attributes['repromptText']);
+        this.emit(':ask', this.attributes['speechOutput'] + this.attributes['audioClip'] + "What note was that?",
+                        this.attributes['repromptText']);
 
     },
 });
