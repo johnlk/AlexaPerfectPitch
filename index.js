@@ -14,6 +14,7 @@ const APP_ID = undefined; // TODO replace with your app ID (OPTIONAL)
 var clips = require('./clips').clips;
 
 var score = 0;
+var clipIndex;
 
 const newSessionHandlers = {
     'LaunchRequest': function () {
@@ -33,6 +34,11 @@ const newSessionHandlers = {
     },
 };
 
+function isCorrect(userAnswer){
+    var correctAnswer = clips[clipIndex].answer;
+    return userAnswer.toLowerCase() == correctAnswer.toLowerCase();
+}
+
 function handleUserGuess(userDoesntKnow){
     if(userDoesntKnow){
         //emit the answer
@@ -40,7 +46,7 @@ function handleUserGuess(userDoesntKnow){
     }
     var userAnswer = this.event.request.intent.slots.Answer.value;
 
-    if(userAnswer.toLowerCase() == clips[0].answer.toLowerCase()){
+    if(isCorrect(userAnswer)){
         this.emit(':tell', 'You\'re right!');
         score++;
     }else{
@@ -52,8 +58,12 @@ function handleUserGuess(userDoesntKnow){
 const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
     'StartGame': function (newGame) {
 
+        clipIndex = Math.floor(Math.random() * clips.length);
+
         var speech = new Speech();
-        speech.audio('https://s3.amazonaws.com/pianonotes/A.mp3');
+        speech.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+
+        console.log('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
         
         Object.assign(this.attributes, {
             'speechOutput': 'Hello, here\'s a note.',

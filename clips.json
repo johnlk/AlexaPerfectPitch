@@ -1,6 +1,70 @@
 {
 	"clips": [{
-		"name": "A.mp3",
+		"name": "C0.mp3",
+		"answer": "C"
+	},
+	{
+		"name": "C%230.mp3",
+		"answer": "C sharp"
+	},
+	{
+		"name": "D0.mp3",
+		"answer": "D"
+	},
+	{
+		"name": "D%230.mp3",
+		"answer": "D sharp"
+	},
+	{
+		"name": "E0.mp3",
+		"answer": "E"
+	},
+	{
+		"name": "F0.mp3",
+		"answer": "F"
+	},
+	{
+		"name": "F%230.mp3",
+		"answer": "F sharp"
+	},
+	{
+		"name": "G0.mp3",
+		"answer": "G"
+	},
+	{
+		"name": "G%230.mp3",
+		"answer": "G sharp"
+	},
+	{
+		"name": "A0.mp3",
 		"answer": "A"
+	},
+	{
+		"name": "A%230.mp3",
+		"answer": "A sharp"
+	},
+	{
+		"name": "B0.mp3",
+		"answer": "B"
+	},
+	{
+		"name": "C1.mp3",
+		"answer": "C"
+	},
+	{
+		"name": "C%231.mp3",
+		"answer": "C sharp"
+	},
+	{
+		"name": "D1.mp3",
+		"answer": "D"
+	},
+	{
+		"name": "D%231.mp3",
+		"answer": "D sharp"
+	},
+	{
+		"name": "E1.mp3",
+		"answer": "E"
 	}]
 }
