@@ -106,6 +106,9 @@ function handleUserGuess(userDoesntKnow){
 const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
     'StartGame': function (newGame) {
 
+        clipsPlayed = 0;
+        score = 0;
+
         clipIndex = Math.floor(Math.random() * clips.length);
 
         var audioClip = new Speech();
