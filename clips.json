@@ -66,5 +66,57 @@
 	{
 		"name": "E1.mp3",
 		"answer": "E"
+	},
+	{
+		"name": "F1.mp3",
+		"answer": "F"
+	},
+	{
+		"name": "F%231.mp3",
+		"answer": "F sharp"
+	},
+	{
+		"name": "G1.mp3",
+		"answer": "G"
+	},
+	{
+		"name": "G%231.mp3",
+		"answer": "G sharp"
+	},
+	{
+		"name": "A1.mp3",
+		"answer": "A"
+	},
+	{
+		"name": "A%231.mp3",
+		"answer": "A sharp"
+	},
+	{
+		"name": "B1.mp3",
+		"answer": "B"
+	},
+	{
+		"name": "C2.mp3",
+		"answer": "C"
+	},
+	{
+		"name": "C%232.mp3",
+		"answer": "C sharp"
+	},
+	{
+		"name": "D2.mp3",
+		"answer": "D"
+	},
+	{
+		"name": "D%232.mp3",
+		"answer": "D sharp"
+	},
+	{
+		"name": "E2.mp3",
+		"answer": "E"
+	},
+	{
+		"name": "F2.mp3",
+		"answer": "F"
 	}]
 }

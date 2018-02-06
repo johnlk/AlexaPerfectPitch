@@ -98,7 +98,7 @@ function handleUserGuess(userDoesntKnow){
         repeat.say("Here is the note again.")
               .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
 
-        // console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+        console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
 
         Object.assign(this.attributes, {
             'speechOutput': speech.ssml(true),
@@ -134,7 +134,7 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
         repeat.say("Here is the note again.")
               .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
 
-        // console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+        console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
 
         Object.assign(this.attributes, {
             'speechOutput': speech.ssml(true),
