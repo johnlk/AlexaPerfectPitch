@@ -42,28 +42,32 @@ function isCorrect(userAnswer){
 }
 
 function handleUserGuess(userDoesntKnow){
+    var speech = new Speech();
     var response = "";
     //user doesn't know
     if(userDoesntKnow){
         //emit the answer
         response = 'The note was';
-        if(clips[clipIndex].answer[0] == 'A'){
+        if(clips[clipIndex].answer[0] == 'A' || clips[clipIndex].answer[0] == 'E'){
             response += ' an ';
         }else{
             response += ' a ';
         }
-        response += clips[clipIndex].answer + '. Maybe you\'ll know this one. ';
-        
+        response += clips[clipIndex].answer;
+        speech.say(response)
+              .pause('1s')
+              .say("Maybe you will know this one.");
+
     }else{ //user answered, so check it
 
         var userAnswer = this.event.request.intent.slots.Answer.value;
 
         if(isCorrect(userAnswer)){
-            response = 'You\'re right! ';
+            response = "You're right!";
             score++;
         }else{
             response = 'Sorry. It was actually';
-            if(clips[clipIndex].answer[0] == 'A'){
+            if(clips[clipIndex].answer[0] == 'A' || clips[clipIndex].answer[0] == 'E'){
                 response += ' an ';
             }else{
                 response += ' a ';
@@ -74,26 +78,34 @@ function handleUserGuess(userDoesntKnow){
         console.log('User Answer: ' + userAnswer);
         console.log('Correct Answer: ' + clips[clipIndex].answer);
 
+        speech.say(response)
+              .pause('1s');
+
     }
     
     if(clipsPlayed < gameLength){
-        response += 'Now try this note. ';
+
+        speech.say('Now try this note.')
+              .pause('1s');
 
         clipIndex = Math.floor(Math.random() * clips.length);
 
-        var audioClip = new Speech();
-        audioClip.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+        speech.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name)
+              .say('What note was that?');
 
-        console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+        //repeat speech
+        var repeat = new Speech();
+        repeat.say("Here is the note again.")
+              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+
+        // console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
 
         Object.assign(this.attributes, {
-            'speechOutput': 'What note was that?',
-            'audioClip': audioClip.ssml(true),
-            'repromptText': 'Just guess a note.'
+            'speechOutput': speech.ssml(true),
+            'repromptText': repeat.ssml(true)
         });
 
-        this.emit(':ask', response + this.attributes['audioClip'] + this.attributes['speechOutput']
-                        ,this.attributes['repromptText']);
+        this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
 
         clipsPlayed++;
     }else{
@@ -111,22 +123,26 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
 
         clipIndex = Math.floor(Math.random() * clips.length);
 
-        var audioClip = new Speech();
-        audioClip.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+        var speech = new Speech();
+        speech.say("Hello. I'm going to play you " + gameLength + " notes on the piano.")
+              .say('You just have to guess the note that was played.')
+              .say("Let's see how you do.")
+              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name)
+              .say('What note was that?');
+        
+        var repeat = new Speech();
+        repeat.say("Here is the note again.")
+              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
 
-        console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+        // console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
 
         Object.assign(this.attributes, {
-            'speechOutput': 'What note was that?',
-            'audioClip': audioClip.ssml(true),
-            'repromptText': 'Just guess a note.'
+            'speechOutput': speech.ssml(true),
+            'repromptText': repeat.ssml(true)
         });
 
         this.handler.state = GAME_STATES.GAME;
-        this.emit(':ask', "Hello. I'm going to play you " + gameLength + " notes on the piano. " + 
-                        "You just have to guess the note that was played. Let's see how you do." + 
-                        this.attributes['audioClip'] + this.attributes['speechOutput'], 
-                        this.attributes['repromptText']);
+        this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
 
         clipsPlayed++;
 
@@ -141,10 +157,11 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
         handleUserGuess.call(this, true);
     },
     'AMAZON.RepeatIntent': function () {
-        this.emit(':ask', this.attributes['audioClip'], this.attributes['repromptText']);
+        this.emit(':ask', this.attributes['repromptText'], this.attributes['repromptText']);
     },
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
+        this.emit(':tell', 'See you later.');
     },
     'Unhandled': function () {
         console.log('unhandled from trivia state');
