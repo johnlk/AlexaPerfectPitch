@@ -4,9 +4,10 @@ const Alexa = require('alexa-sdk');
 var Speech = require('ssml-builder');
 
 const GAME_STATES = {
-    GAME: '_GAMEMODE', // Asking trivia questions.
+    GAME: '_GAMEMODE', // Quizzing on note names
+    LEARN: '_LEARNMODE', // Quizzing on note names
     START: '_STARTMODE', // Entry point, start the game.
-    // HELP: '_HELPMODE', // The user is asking for help.
+    SELECT: '_SELECTION' // For selecting game type
 };
 
 const APP_ID = undefined; // TODO replace with your app ID (OPTIONAL)
@@ -18,40 +19,17 @@ var clipIndex;
 var gameLength = 5;
 var clipsPlayed = 0;
 
-const newSessionHandlers = {
-    'LaunchRequest': function () {
-        this.handler.state = GAME_STATES.START;
-        this.emitWithState('StartGame', true);
-    },
-    'AMAZON.StartOverIntent': function () {
-        this.handler.state = GAME_STATES.START;
-        this.emitWithState('StartGame', true);
-    },
-    // 'AMAZON.HelpIntent': function () {
-    //     this.handler.state = GAME_STATES.HELP;
-    //     this.emitWithState('helpTheUser', true);
-    // },
-    'Unhandled': function () {
-        console.log('unhandled event');
-    },
-};
-
 function getNHarmoic(){ //n harmonic means 2 names, same note C# == Db for instance
     var answer = getAnswer();
     if(answer.length == 1){
         return '';
     }
     switch(answer[0]){
-        case 'C':
-            return 'D flat';
-        case 'D':
-            return 'E flat';
-        case 'F':
-            return 'G flat';
-        case 'G':
-            return 'A flat';
-        case 'A':
-            return 'B flat';
+        case 'C': return 'D flat';
+        case 'D': return 'E flat';
+        case 'F': return 'G flat';
+        case 'G': return 'A flat';
+        case 'A': return 'B flat';
     }
     return '';
 }
@@ -126,7 +104,7 @@ function handleUserGuess(userDoesntKnow){
 
     }
     
-    if(clipsPlayed <= gameLength){
+    if(clipsPlayed < gameLength){
 
         speech.say('Now try this note.')
               .pause('1s');
@@ -158,8 +136,43 @@ function handleUserGuess(userDoesntKnow){
 
 }
 
-const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
-    'StartGame': function (newGame) {
+const newSessionHandlers = {
+    'LaunchRequest': function () {
+        this.handler.state = GAME_STATES.SELECT;
+        this.emitWithState('StartGame');
+    },
+    'AMAZON.StartOverIntent': function () {
+        this.handler.state = GAME_STATES.SELECT;
+        this.emitWithState('StartGame');
+    },
+    'Unhandled': function () {
+        console.log('unhandled event');
+    },
+};
+
+const gameSelectionHandlers = Alexa.CreateStateHandler(GAME_STATES.SELECT, {
+    'StartGame': function(){
+        this.emit(':ask', 'Hello. I have two modes of play, a game mode and a learning mode. ' + 
+            'Which would you like to do? Simply say either Learn or Game.', 'Just say Learn or Game.');
+    },
+    'SelectModeIntent': function(){
+        var selection = this.event.request.intent.slots.Mode.value;
+        console.log(selection);
+        if(selection == 'learn'){
+            this.handler.state = GAME_STATES.LEARN;
+            this.emitWithState('StartLearning');
+        }else{ //playing the game
+            this.handler.state = GAME_STATES.GAME;
+            this.emitWithState('PlayGame');
+        }
+    },
+    'Unhandled': function () {
+        console.log('unhandled from select state');
+    }
+});
+
+const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
+    'PlayGame': function (newGame) {
 
         clipsPlayed = 0;
         score = 0;
@@ -167,7 +180,7 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
         clipIndex = Math.floor(Math.random() * clips.length);
 
         var speech = new Speech();
-        speech.say("Hello. I am going to play you " + gameLength + " notes on the piano.")
+        speech.say("Alright I am going to play you " + gameLength + " notes on the piano.")
               .say('You just have to guess the note that was played.')
               .say("Let's see how you do.")
               .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
@@ -190,9 +203,6 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
         clipsPlayed++;
 
     },
-});
-
-const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
     'AnswerIntent': function () {
         handleUserGuess.call(this, false);
     },
@@ -207,7 +217,26 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
         this.emit(':tell', 'See you later.');
     },
     'Unhandled': function () {
-        console.log('unhandled from trivia state');
+        console.log('unhandled from game state');
+    },
+    'SessionEndedRequest': function () {
+        console.log(`Session ended in trivia state: ${this.event.request.reason}`);
+    },
+});
+
+const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
+    'StartLearning': function(){
+        this.emit(':tell', 'You are totally gonna learn soon');
+    },
+    'ContinueIntent': function(){
+        console.log('they kept going');
+    },
+    'AMAZON.StopIntent': function () {
+        console.log('game stopped');
+        this.emit(':tell', 'See you later.');
+    },
+    'Unhandled': function () {
+        console.log('unhandled from learn state');
     },
     'SessionEndedRequest': function () {
         console.log(`Session ended in trivia state: ${this.event.request.reason}`);
@@ -218,6 +247,6 @@ exports.handler = function (event, context) {
     const alexa = Alexa.handler(event, context);
     alexa.appId = APP_ID;
     // To enable string internationalization (i18n) features, set a resources object.
-    alexa.registerHandlers(newSessionHandlers, gameStateHandlers, startStateHandlers);
+    alexa.registerHandlers(newSessionHandlers, gameSelectionHandlers, gameStateHandlers, learnStateHanders);
     alexa.execute();
 };
