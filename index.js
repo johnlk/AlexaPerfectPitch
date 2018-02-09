@@ -36,11 +36,12 @@ const newSessionHandlers = {
     },
 };
 
-function getNHarmoic(noteName){ //n harmonic means 2 names, same note C# == Db for instance
-    if(noteName.length == 1){
+function getNHarmoic(){ //n harmonic means 2 names, same note C# == Db for instance
+    var answer = getAnswer();
+    if(answer.length == 1){
         return '';
     }
-    switch(noteName[0]){
+    switch(answer[0]){
         case 'C':
             return 'D flat';
         case 'D':
@@ -55,9 +56,18 @@ function getNHarmoic(noteName){ //n harmonic means 2 names, same note C# == Db f
     return '';
 }
 
+function getAnswer(){
+    var name = clips[clipIndex];
+    if(name[1] != '%'){
+        return name[0]; //C or D
+    }else{
+        return name[0] + ' sharp';
+    }
+}
+
 function isCorrect(userAnswer){
-    var correctAnswer = clips[clipIndex].answer;
-    var nHarmonic = getNHarmoic(correctAnswer);
+    var correctAnswer = getAnswer();
+    var nHarmonic = getNHarmoic();
     if(userAnswer.indexOf('.') != -1){
         userAnswer = userAnswer.substring(0, userAnswer.indexOf('.')) + 
                      userAnswer.substring(userAnswer.indexOf('.') + 1, userAnswer.length); //remove periods
@@ -69,8 +79,8 @@ function isCorrect(userAnswer){
 function handleUserGuess(userDoesntKnow){
     var speech = new Speech();
     var response = "";
-    var firstLetter = clips[clipIndex].answer[0];
-    var nHarmonic = getNHarmoic(clips[clipIndex].answer);
+    var firstLetter = getAnswer()[0];
+    var nHarmonic = getNHarmoic();
     //user doesn't know
     if(userDoesntKnow){
         //emit the answer
@@ -80,7 +90,7 @@ function handleUserGuess(userDoesntKnow){
         }else{
             response += ' a ';
         }
-        response += clips[clipIndex].answer;
+        response += getAnswer();
         if(nHarmonic != ''){
             response += ' or ' + nHarmonic + '. ';
         }
@@ -102,36 +112,36 @@ function handleUserGuess(userDoesntKnow){
             }else{
                 response += ' a ';
             }
-            response += clips[clipIndex].answer; 
+            response += getAnswer(); 
             if(nHarmonic != ''){
                 response += ' or ' + nHarmonic + '. ';
             }
         }
 
         console.log('User Answer: ' + userAnswer);
-        console.log('Correct Answer: ' + clips[clipIndex].answer);
+        console.log('Correct Answer: ' + getAnswer());
 
         speech.say(response)
               .pause('1s');
 
     }
     
-    if(clipsPlayed < gameLength){
+    if(clipsPlayed <= gameLength){
 
         speech.say('Now try this note.')
               .pause('1s');
 
         clipIndex = Math.floor(Math.random() * clips.length);
 
-        speech.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name)
+        speech.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
               .say('What note was that?');
 
         //repeat speech
         var repeat = new Speech();
         repeat.say("Here is the note again.")
-              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex]);
 
-        console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+        console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex]);
 
         Object.assign(this.attributes, {
             'speechOutput': speech.ssml(true),
@@ -160,14 +170,14 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
         speech.say("Hello. I am going to play you " + gameLength + " notes on the piano.")
               .say('You just have to guess the note that was played.')
               .say("Let's see how you do.")
-              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name)
+              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
               .say('What note was that?');
         
         var repeat = new Speech();
         repeat.say("Here is the note again.")
-              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+              .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex]);
 
-        console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name);
+        console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex]);
 
         Object.assign(this.attributes, {
             'speechOutput': speech.ssml(true),
