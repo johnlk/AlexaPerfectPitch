@@ -124,7 +124,7 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
         clipIndex = Math.floor(Math.random() * clips.length);
 
         var speech = new Speech();
-        speech.say("Hello. I'm going to play you " + gameLength + " notes on the piano.")
+        speech.say("Hello. I am going to play you " + gameLength + " notes on the piano.")
               .say('You just have to guess the note that was played.')
               .say("Let's see how you do.")
               .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex].name)
