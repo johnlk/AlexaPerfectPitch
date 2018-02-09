@@ -36,24 +36,54 @@ const newSessionHandlers = {
     },
 };
 
+function getNHarmoic(noteName){ //n harmonic means 2 names, same note C# == Db for instance
+    if(noteName.length == 1){
+        return '';
+    }
+    switch(noteName[0]){
+        case 'C':
+            return 'D flat';
+        case 'D':
+            return 'E flat';
+        case 'F':
+            return 'G flat';
+        case 'G':
+            return 'A flat';
+        case 'A':
+            return 'B flat';
+    }
+    return '';
+}
+
 function isCorrect(userAnswer){
     var correctAnswer = clips[clipIndex].answer;
-    return userAnswer.toLowerCase() == correctAnswer.toLowerCase();
+    var nHarmonic = getNHarmoic(correctAnswer);
+    if(userAnswer.indexOf('.') != -1){
+        userAnswer = userAnswer.substring(0, userAnswer.indexOf('.')) + 
+                     userAnswer.substring(userAnswer.indexOf('.') + 1, userAnswer.length); //remove periods
+    }
+    return userAnswer.toLowerCase() == correctAnswer.toLowerCase() || 
+           userAnswer.toLowerCase() == nHarmonic.toLowerCase();
 }
 
 function handleUserGuess(userDoesntKnow){
     var speech = new Speech();
     var response = "";
+    var firstLetter = clips[clipIndex].answer[0];
+    var nHarmonic = getNHarmoic(clips[clipIndex].answer);
     //user doesn't know
     if(userDoesntKnow){
         //emit the answer
         response = 'The note was';
-        if(clips[clipIndex].answer[0] == 'A' || clips[clipIndex].answer[0] == 'E'){
+        if(firstLetter == 'A' || firstLetter == 'E' || firstLetter == 'F'){
             response += ' an ';
         }else{
             response += ' a ';
         }
         response += clips[clipIndex].answer;
+        if(nHarmonic != ''){
+            response += ' or ' + nHarmonic + '. ';
+        }
         speech.say(response)
               .pause('1s')
               .say("Maybe you will know this one.");
@@ -67,12 +97,15 @@ function handleUserGuess(userDoesntKnow){
             score++;
         }else{
             response = 'Sorry. It was actually';
-            if(clips[clipIndex].answer[0] == 'A' || clips[clipIndex].answer[0] == 'E'){
+            if(firstLetter == 'A' || firstLetter == 'E' || firstLetter == 'F'){
                 response += ' an ';
             }else{
                 response += ' a ';
             }
-            response += clips[clipIndex].answer + '. ';
+            response += clips[clipIndex].answer; 
+            if(nHarmonic != ''){
+                response += ' or ' + nHarmonic + '. ';
+            }
         }
 
         console.log('User Answer: ' + userAnswer);
@@ -109,7 +142,7 @@ function handleUserGuess(userDoesntKnow){
 
         clipsPlayed++;
     }else{
-        this.emit(':tell', response + "You've reached the end. You got " + score + " right out of " + 
+        this.emit(':tell', this.attributes['speechOutput'] + "You've reached the end. You got " + score + " right out of " + 
                            gameLength + " notes.");
     }
 
