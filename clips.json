@@ -1,122 +1,43 @@
 {
-	"clips": [{
-		"name": "C0.mp3",
-		"answer": "C"
-	},
-	{
-		"name": "C%230.mp3",
-		"answer": "C sharp"
-	},
-	{
-		"name": "D0.mp3",
-		"answer": "D"
-	},
-	{
-		"name": "D%230.mp3",
-		"answer": "D sharp"
-	},
-	{
-		"name": "E0.mp3",
-		"answer": "E"
-	},
-	{
-		"name": "F0.mp3",
-		"answer": "F"
-	},
-	{
-		"name": "F%230.mp3",
-		"answer": "F sharp"
-	},
-	{
-		"name": "G0.mp3",
-		"answer": "G"
-	},
-	{
-		"name": "G%230.mp3",
-		"answer": "G sharp"
-	},
-	{
-		"name": "A0.mp3",
-		"answer": "A"
-	},
-	{
-		"name": "A%230.mp3",
-		"answer": "A sharp"
-	},
-	{
-		"name": "B0.mp3",
-		"answer": "B"
-	},
-	{
-		"name": "C1.mp3",
-		"answer": "C"
-	},
-	{
-		"name": "C%231.mp3",
-		"answer": "C sharp"
-	},
-	{
-		"name": "D1.mp3",
-		"answer": "D"
-	},
-	{
-		"name": "D%231.mp3",
-		"answer": "D sharp"
-	},
-	{
-		"name": "E1.mp3",
-		"answer": "E"
-	},
-	{
-		"name": "F1.mp3",
-		"answer": "F"
-	},
-	{
-		"name": "F%231.mp3",
-		"answer": "F sharp"
-	},
-	{
-		"name": "G1.mp3",
-		"answer": "G"
-	},
-	{
-		"name": "G%231.mp3",
-		"answer": "G sharp"
-	},
-	{
-		"name": "A1.mp3",
-		"answer": "A"
-	},
-	{
-		"name": "A%231.mp3",
-		"answer": "A sharp"
-	},
-	{
-		"name": "B1.mp3",
-		"answer": "B"
-	},
-	{
-		"name": "C2.mp3",
-		"answer": "C"
-	},
-	{
-		"name": "C%232.mp3",
-		"answer": "C sharp"
-	},
-	{
-		"name": "D2.mp3",
-		"answer": "D"
-	},
-	{
-		"name": "D%232.mp3",
-		"answer": "D sharp"
-	},
-	{
-		"name": "E2.mp3",
-		"answer": "E"
-	},
-	{
-		"name": "F2.mp3",
-		"answer": "F"
-	}]
+	"clips": [{"name": "C0.mp3","answer": "C"},
+	{"name": "C%230.mp3","answer": "C sharp"},
+	{"name": "D0.mp3","answer": "D"},
+	{"name": "D%230.mp3","answer": "D sharp"},
+	{"name": "E0.mp3","answer": "E"	},
+	{"name": "F0.mp3","answer": "F"	},
+	{"name": "F%230.mp3","answer": "F sharp"},
+	{"name": "G0.mp3","answer": "G"},
+	{"name": "G%230.mp3","answer": "G sharp"},
+	{"name": "A0.mp3","answer": "A"},
+	{"name": "A%230.mp3","answer": "A sharp"},
+	{"name": "B0.mp3","answer": "B"},
+	{"name": "C1.mp3","answer": "C"},
+	{"name": "C%231.mp3","answer": "C sharp"},
+	{"name": "D1.mp3","answer": "D"},
+	{"name": "D%231.mp3","answer": "D sharp"},
+	{"name": "E1.mp3","answer": "E"},
+	{"name": "F1.mp3","answer": "F"},
+	{"name": "F%231.mp3","answer": "F sharp"},
+	{"name": "G1.mp3","answer": "G"},
+	{"name": "G%231.mp3","answer": "G sharp"},
+	{"name": "A1.mp3","answer": "A"},
+	{"name": "A%231.mp3","answer": "A sharp"},
+	{"name": "B1.mp3","answer": "B"},
+	{"name": "C2.mp3","answer": "C"},
+	{"name": "C%232.mp3","answer": "C sharp"},
+	{"name": "D2.mp3","answer": "D"},
+	{"name": "D%232.mp3","answer": "D sharp"},
+	{"name": "E2.mp3","answer": "E"},
+	{"name": "F2.mp3","answer": "F"},
+	{"name": "F%232.mp3","answer": "F sharp"},
+	{"name": "G2.mp3","answer": "G"},
+	{"name": "G%232.mp3","answer": "G sharp"},
+	{"name": "A2.mp3","answer": "A"},
+	{"name": "A%232.mp3","answer": "A sharp"},
+	{"name": "B2.mp3","answer": "B"},
+	{"name": "C3.mp3","answer": "C"},
+	{"name": "C%233.mp3","answer": "C sharp"},
+	{"name": "D3.mp3","answer": "D"},
+	{"name": "D%233.mp3","answer": "D sharp"},
+	{"name": "E3.mp3","answer": "E"}]
 }
