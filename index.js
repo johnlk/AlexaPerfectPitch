@@ -18,6 +18,16 @@ var score = 0;
 var clipIndex;
 var gameLength = 5;
 var clipsPlayed = 0;
+var clipsAlreadyPlayed = [];
+
+function alreadyPlayed(){
+    for(var i = 0; i < clipsAlreadyPlayed.length; i++){
+        if(clipIndex == clipsAlreadyPlayed[i]){
+            return true;
+        }
+    }
+    return false;
+}
 
 function getNHarmoic(){ //n harmonic means 2 names, same note C# == Db for instance
     var answer = getAnswer();
@@ -106,10 +116,15 @@ function handleUserGuess(userDoesntKnow){
     
     if(clipsPlayed < gameLength){
 
-        speech.say('Now try this note.')
+        speech.say("Here's another")
               .pause('1s');
 
-        clipIndex = Math.floor(Math.random() * clips.length);
+        do{
+            clipIndex = Math.floor(Math.random() * clips.length);
+        }while(alreadyPlayed());
+
+        clipsPlayed++;
+        clipsAlreadyPlayed.push(clipIndex);
 
         speech.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
               .say('What note was that?');
@@ -128,7 +143,6 @@ function handleUserGuess(userDoesntKnow){
 
         this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
 
-        clipsPlayed++;
     }else{
         this.emit(':tell', this.attributes['speechOutput'] + "You've reached the end. You got " + score + " right out of " + 
                            gameLength + " notes.");
@@ -163,7 +177,7 @@ const gameSelectionHandlers = Alexa.CreateStateHandler(GAME_STATES.SELECT, {
             this.emitWithState('StartLearning');
         }else{ //playing the game
             this.handler.state = GAME_STATES.GAME;
-            this.emitWithState('PlayGame');
+            this.emitWithState('PlayGame', false);
         }
     },
     'Unhandled': function () {
@@ -177,7 +191,9 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
         clipsPlayed = 0;
         score = 0;
 
-        clipIndex = Math.floor(Math.random() * clips.length);
+        do{
+            clipIndex = Math.floor(Math.random() * clips.length);
+        }while(alreadyPlayed());
 
         var speech = new Speech();
         speech.say("Alright I am going to play you " + gameLength + " notes on the piano.")
@@ -197,10 +213,11 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
             'repromptText': repeat.ssml(true)
         });
 
+        clipsPlayed++;
+        clipsAlreadyPlayed.push(clipIndex);
+
         this.handler.state = GAME_STATES.GAME;
         this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
-
-        clipsPlayed++;
 
     },
     'AnswerIntent': function () {
@@ -225,26 +242,29 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
 });
 
 const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
-    'StartLearning': function(){
+    'StartLearning': function(newGame){
         var speech = new Speech();
         speech.say("Okay. I am going to play you some natural notes.") 
               .pause('1s')
-              .say("No sharps or flats, just A, through G.")
+              .say("No sharps or flats, just notes A, through G.")
+              .pause('1s')
               .say("Here comes your first one.")
               .pause('1s');
 
         var notes = 0;
 
-        while(notes < 2){
+        while(notes < 5){
 
             do{
                 clipIndex = Math.floor(Math.random() * clips.length);
-            }while(getNHarmoic() != '');//while it's a sharp or flat
+            }while(getNHarmoic() != '' || alreadyPlayed());//while it's a sharp or flat
+
+            clipsAlreadyPlayed.push(clipIndex);
 
             speech.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
-                  .pause('1s')
-                  .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
                   .pause('1s');
+                  // .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
+                  // .pause('1s');
 
             console.log('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex]);
 
@@ -261,10 +281,8 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
             speech.say(noteName)
                   .pause('1s');
 
-            notes += 1;
+            notes++;
         }
-
-        console.log('got to here');
 
         speech.say("Okay there was 5 notes to think about.")
               .say("Would you like to hear 5 more?");
@@ -274,15 +292,15 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
             'repromptText': "Would you like to hear more?"
         });
 
-        console.log('got to here too');
-
         this.handler.state = GAME_STATES.LEARN;
         this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
+
+        console.log('got to here');
 
     },
     'ContinueIntent': function(){
         console.log('they kept going');
-        this.emitWithState('StartLearning');
+        this.emitWithState('StartLearning', true);
     },
     'AMAZON.NoIntent': function(){
         this.emit(':tell', 'See you later.');
