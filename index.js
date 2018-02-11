@@ -159,11 +159,11 @@ function handleUserGuess(userDoesntKnow){
 const newSessionHandlers = {
     'LaunchRequest': function () {
         this.handler.state = GAME_STATES.SELECT;
-        this.emitWithState('StartGame');
+        this.emitWithState('StartSkill');
     },
     'AMAZON.StartOverIntent': function () {
         this.handler.state = GAME_STATES.SELECT;
-        this.emitWithState('StartGame');
+        this.emitWithState('StartSkill');
     },
     'Unhandled': function () {
         console.log('unhandled event');
@@ -171,7 +171,7 @@ const newSessionHandlers = {
 };
 
 const gameSelectionHandlers = Alexa.CreateStateHandler(GAME_STATES.SELECT, {
-    'StartGame': function(){
+    'StartSkill': function(){
         this.emit(':ask', 'Hello. I have two modes of play, a game mode and a learning mode. ' + 
             'Which would you like to do? Simply say either Learn or Game.', 'Just say Learn or Game.');
     },
@@ -180,7 +180,7 @@ const gameSelectionHandlers = Alexa.CreateStateHandler(GAME_STATES.SELECT, {
         console.log(selection);
         if(selection == 'learn'){
             this.handler.state = GAME_STATES.LEARN;
-            this.emitWithState('StartLearning');
+            this.emitWithState('StartLearning', false);
         }else{ //playing the game
             this.handler.state = GAME_STATES.GAME;
             this.emitWithState('PlayGame', false);
@@ -256,12 +256,17 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
 const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
     'StartLearning': function(newGame){
         var speech = new Speech();
-        speech.say("Okay. I am going to play you some natural notes.") 
+
+        if(!newGame){
+            speech.say("Okay. I am going to play you some natural notes.") 
               .pause('1s')
               .say("No sharps or flats, just notes A, through G.")
               .pause('1s')
               .say("Here comes your first one.")
               .pause('1s');
+        }else{
+            speech.say("Since you're playing again. I'll through sharps and flats into the mix");
+        }
 
         var notes = 0;
 
@@ -269,7 +274,7 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
 
             do{
                 clipIndex = Math.floor(Math.random() * clips.length);
-            }while(getNHarmoic() != '' || alreadyPlayed());//while it's a sharp or flat
+            }while((!newGame && getNHarmoic() != '') || alreadyPlayed());//while it's a sharp or flat
 
             clipsAlreadyPlayed.push(clipIndex);
 
@@ -290,6 +295,11 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
             }
 
             noteName += getAnswer();
+
+            if(nHarmonic != ''){
+                noteName += ' or ' + nHarmonic + '. ';
+            }
+
             speech.say(noteName)
                   .pause('1s');
 
