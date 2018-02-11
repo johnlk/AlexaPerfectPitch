@@ -296,8 +296,8 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
 
             noteName += getAnswer();
 
-            if(nHarmonic != ''){
-                noteName += ' or ' + nHarmonic + '. ';
+            if(getNHarmoic() != ''){
+                noteName += ' or ' + getNHarmoic() + '. ';
             }
 
             speech.say(noteName)
