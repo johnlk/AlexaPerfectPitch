@@ -226,10 +226,66 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
 
 const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
     'StartLearning': function(){
-        this.emit(':tell', 'You are totally gonna learn soon');
+        var speech = new Speech();
+        speech.say("Okay. I am going to play you some natural notes.") 
+              .pause('1s')
+              .say("No sharps or flats, just A, through G.")
+              .say("Here comes your first one.")
+              .pause('1s');
+
+        var notes = 0;
+
+        while(notes < 2){
+
+            do{
+                clipIndex = Math.floor(Math.random() * clips.length);
+            }while(getNHarmoic() != '');//while it's a sharp or flat
+
+            speech.audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
+                  .pause('1s')
+                  .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
+                  .pause('1s');
+
+            console.log('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex]);
+
+            var noteName = "That was ";
+            var firstLetter = getAnswer()[0];
+
+            if(firstLetter == 'A' || firstLetter == 'E' || firstLetter == 'F'){
+                noteName += " an ";
+            }else{
+                noteName += " a ";
+            }
+
+            noteName += getAnswer();
+            speech.say(noteName)
+                  .pause('1s');
+
+            notes += 1;
+        }
+
+        console.log('got to here');
+
+        speech.say("Okay there was 5 notes to think about.")
+              .say("Would you like to hear 5 more?");
+
+        Object.assign(this.attributes, {
+            'speechOutput': speech.ssml(true),
+            'repromptText': "Would you like to hear more?"
+        });
+
+        console.log('got to here too');
+
+        this.handler.state = GAME_STATES.LEARN;
+        this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
+
     },
     'ContinueIntent': function(){
         console.log('they kept going');
+        this.emitWithState('StartLearning');
+    },
+    'AMAZON.NoIntent': function(){
+        this.emit(':tell', 'See you later.');
     },
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
@@ -239,7 +295,7 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
         console.log('unhandled from learn state');
     },
     'SessionEndedRequest': function () {
-        console.log(`Session ended in trivia state: ${this.event.request.reason}`);
+        console.log(`Session ended in learn state: ${this.event.request.reason}`);
     },
 });
 
