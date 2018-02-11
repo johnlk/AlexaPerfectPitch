@@ -247,6 +247,9 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
         console.log('they kept going');
         this.emitWithState('PlayGame', true);
     },
+    'StopIntent': function(){
+        this.emit(':tell', 'See you later.');
+    },
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
         this.emit(':tell', 'See you later.');
@@ -329,6 +332,9 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
     'ContinueIntent': function(){
         console.log('they kept going');
         this.emitWithState('StartLearning', true);
+    },
+    'StopIntent': function(){
+        this.emit(':tell', 'See you later.');
     },
     'AMAZON.NoIntent': function(){
         this.emit(':tell', 'See you later.');
