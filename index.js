@@ -151,8 +151,9 @@ function handleUserGuess(userDoesntKnow){
         'repromptText': repeat.ssml(true)
     });
 
-    this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
 
+    this.handler.state = GAME_STATES.GAME;
+    this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
 
 }
 
@@ -202,11 +203,18 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
         }while(alreadyPlayed());
 
         var speech = new Speech();
-        speech.say("Alright I am going to play you " + gameLength + " notes on the piano.")
+        if(!newGame){
+            speech.say("Alright I am going to play you " + gameLength + " notes on the piano.")
               .say('You just have to guess the note that was played.')
               .say("Let's see how you do.")
               .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
               .say('What note was that?');
+        }else{
+            speech.say("Let's keep going")
+                  .pause('1s')
+                  .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex])
+                  .say('What note was that?');
+        }
         
         var repeat = new Speech();
         repeat.say("Here is the note again.")
@@ -235,11 +243,9 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
     'AMAZON.RepeatIntent': function () {
         this.emit(':ask', this.attributes['repromptText'], this.attributes['repromptText']);
     },
-    'AMAZON.YesIntent': function(){
+    'ContinueIntent': function(){
+        console.log('they kept going');
         this.emitWithState('PlayGame', true);
-    },
-    'AMAZON.NoIntent': function(){
-        this.emit(':tell', 'See you later.');
     },
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
