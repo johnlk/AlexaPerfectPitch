@@ -66,6 +66,7 @@ function isCorrect(userAnswer){
 
 function handleUserGuess(userDoesntKnow){
     var speech = new Speech();
+    var repeat = new Speech();
     var response = "";
     var firstLetter = getAnswer()[0];
     var nHarmonic = getNHarmoic();
@@ -130,23 +131,28 @@ function handleUserGuess(userDoesntKnow){
               .say('What note was that?');
 
         //repeat speech
-        var repeat = new Speech();
         repeat.say("Here is the note again.")
               .audio('https://s3.amazonaws.com/pianonotes/' + clips[clipIndex]);
 
         console.log('Audio clip: https://s3.amazonaws.com/pianonotes/' + clips[clipIndex]);
 
-        Object.assign(this.attributes, {
-            'speechOutput': speech.ssml(true),
-            'repromptText': repeat.ssml(true)
-        });
-
-        this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
-
     }else{
-        this.emit(':tell', this.attributes['speechOutput'] + "You've reached the end. You got " + score + " right out of " + 
-                           gameLength + " notes.");
+
+        speech.say("You reach the end recieving a score of " + score + " out of " + gameLength)
+              .pause('1s')
+              .say("Whould you like to play again?");
+
+        repeat.say("Would you like to play again?");
+        
     }
+
+    Object.assign(this.attributes, {
+        'speechOutput': speech.ssml(true),
+        'repromptText': repeat.ssml(true)
+    });
+
+    this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
+
 
 }
 
@@ -228,6 +234,12 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
     },
     'AMAZON.RepeatIntent': function () {
         this.emit(':ask', this.attributes['repromptText'], this.attributes['repromptText']);
+    },
+    'AMAZON.YesIntent': function(){
+        this.emitWithState('PlayGame', true);
+    },
+    'AMAZON.NoIntent': function(){
+        this.emit(':tell', 'See you later.');
     },
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
