@@ -7,7 +7,8 @@ const GAME_STATES = {
     GAME: '_GAMEMODE', // Quizzing on note names
     LEARN: '_LEARNMODE', // Quizzing on note names
     START: '_STARTMODE', // Entry point, start the game.
-    SELECT: '_SELECTION' // For selecting game type
+    SELECT: '_SELECTION', // For selecting game type
+    HELP: '_HELPMODE'
 };
 
 const APP_ID = 'amzn1.ask.skill.e1753e4d-c3e0-449e-9a83-e399db81f64b';
@@ -169,6 +170,10 @@ const newSessionHandlers = {
         this.handler.state = GAME_STATES.SELECT;
         this.emitWithState('StartSkill');
     },
+    'AMAZON.HelpIntent': function () {
+        this.handler.state = GAME_STATES.HELP;
+        this.emitWithState('helpUser', false);
+    },
     'Unhandled': function () {
         console.log('unhandled event');
     },
@@ -189,6 +194,13 @@ const gameSelectionHandlers = Alexa.CreateStateHandler(GAME_STATES.SELECT, {
             this.handler.state = GAME_STATES.GAME;
             this.emitWithState('PlayGame', false);
         }
+    },
+    'AMAZON.HelpIntent': function () {
+        this.handler.state = GAME_STATES.HELP;
+        this.emitWithState('helpUser', false);
+    },
+    'StopIntent': function(){
+        this.emit(':tell', 'See you later.');
     },
     'Unhandled': function () {
         console.log('unhandled from select state');
@@ -354,10 +366,44 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
     },
 });
 
+
+const helpStateHandlers = Alexa.CreateStateHandler(GAME_STATES.HELP, {
+    'helpUser': function(inGame){
+        if(inGame){
+            this.emit(':ask', 'All you have to do is wait for me to play a piano note. ' + 
+                            'Then when it stops playing, give your answer or say that you don\'t know. ' + 
+                            'Would you like to keep playing?', 'Would you like to keep playing?');
+        }else{
+            this.emit(':ask', 'The game has not started yet. Would you like to play?', 'Would you like to play?');
+        }
+    },
+    'AMAZON.YesIntent': function(){
+        this.handler.state = GAME_STATES.TRIVIA;
+        this.emit(':ask', this.attributes['repromptText'], this.attributes['repromptText']);
+    },
+    'AMAZON.NoIntent': function(){
+        this.emit(':tell', 'See you.');
+    },
+    'AMAZON.StopIntent': function () {
+        this.emit(':tell', 'See you.');
+    },
+    'AMAZON.CancelIntent': function () {
+        this.emit(':tell', 'See you later.');
+    },
+    'Unhandled': function () {
+        console.log('unhandled in help');
+        // this.emit('ask:', 'Please say that again');
+    },
+    'SessionEndedRequest': function () {
+        console.log(`Session ended in help state: ${this.event.request.reason}`);
+    }
+});
+
 exports.handler = function (event, context) {
     const alexa = Alexa.handler(event, context);
     alexa.appId = APP_ID;
     // To enable string internationalization (i18n) features, set a resources object.
-    alexa.registerHandlers(newSessionHandlers, gameSelectionHandlers, gameStateHandlers, learnStateHanders);
+    alexa.registerHandlers(newSessionHandlers, gameSelectionHandlers, gameStateHandlers, 
+                            learnStateHanders, helpStateHandlers);
     alexa.execute();
 };
