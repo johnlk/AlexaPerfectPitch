@@ -199,7 +199,7 @@ const gameSelectionHandlers = Alexa.CreateStateHandler(GAME_STATES.SELECT, {
         this.handler.state = GAME_STATES.HELP;
         this.emitWithState('helpUser', false);
     },
-    'StopIntent': function(){
+    'AMAZON.StopIntent': function(){
         this.emit(':tell', 'See you later.');
     },
     'Unhandled': function () {
@@ -261,9 +261,6 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
     'ContinueIntent': function(){
         console.log('they kept going');
         this.emitWithState('PlayGame', true);
-    },
-    'StopIntent': function(){
-        this.emit(':tell', 'See you later.');
     },
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
@@ -347,9 +344,6 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
     'ContinueIntent': function(){
         console.log('they kept going');
         this.emitWithState('StartLearning', true);
-    },
-    'StopIntent': function(){
-        this.emit(':tell', 'See you later.');
     },
     'AMAZON.NoIntent': function(){
         this.emit(':tell', 'See you later.');
