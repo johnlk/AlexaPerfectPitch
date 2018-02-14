@@ -20,6 +20,7 @@ var clipIndex;
 var gameLength = 5;
 var clipsPlayed = 0;
 var clipsAlreadyPlayed = [];
+var inGame = false;
 
 function alreadyPlayed(){
     for(var i = 0; i < clipsAlreadyPlayed.length; i++){
@@ -71,6 +72,7 @@ function handleUserGuess(userDoesntKnow){
     var response = "";
     var firstLetter = getAnswer()[0];
     var nHarmonic = getNHarmoic();
+
     //user doesn't know
     if(userDoesntKnow){
         //emit the answer
@@ -116,7 +118,6 @@ function handleUserGuess(userDoesntKnow){
 
         speech.say(response)
               .pause('1s');
-
     }
     
     if(clipsPlayed < gameLength){
@@ -154,7 +155,6 @@ function handleUserGuess(userDoesntKnow){
         'speechOutput': speech.ssml(true),
         'repromptText': repeat.ssml(true)
     });
-
 
     this.handler.state = GAME_STATES.GAME;
     this.emit(':ask', this.attributes['speechOutput'], this.attributes['repromptText']);
@@ -197,12 +197,13 @@ const gameSelectionHandlers = Alexa.CreateStateHandler(GAME_STATES.SELECT, {
     },
     'AMAZON.HelpIntent': function () {
         this.handler.state = GAME_STATES.HELP;
-        this.emitWithState('helpUser', false);
+        this.emitWithState('helpUser');
     },
     'AMAZON.StopIntent': function(){
         this.emit(':tell', 'See you later.');
     },
     'Unhandled': function () {
+        this.emit(':ask', 'Just say Learn or Game.', 'Just say Learn or Game.');
         console.log('unhandled from select state');
     }
 });
@@ -212,6 +213,7 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
 
         clipsPlayed = 0;
         score = 0;
+        inGame = true;
 
         do{
             clipIndex = Math.floor(Math.random() * clips.length);
@@ -258,9 +260,17 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
     'AMAZON.RepeatIntent': function () {
         this.emit(':ask', this.attributes['repromptText'], this.attributes['repromptText']);
     },
-    'ContinueIntent': function(){
+    'AMAZON.YesIntent': function(){
         console.log('they kept going');
         this.emitWithState('PlayGame', true);
+    },
+    'AMAZON.NoIntent': function () {
+        console.log('game stopped');
+        this.emit(':tell', 'See you later.');
+    },
+    'AMAZON.HelpIntent': function () {
+        this.handler.state = GAME_STATES.HELP;
+        this.emitWithState('helpUser');
     },
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
@@ -270,7 +280,7 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
         console.log('unhandled from game state');
     },
     'SessionEndedRequest': function () {
-        console.log(`Session ended in trivia state: ${this.event.request.reason}`);
+        console.log(`Session ended in game state: ${this.event.request.reason}`);
     },
 });
 
@@ -341,12 +351,16 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
         console.log('got to here');
 
     },
-    'ContinueIntent': function(){
+    'AMAZON.YesIntent': function(){
         console.log('they kept going');
         this.emitWithState('StartLearning', true);
     },
     'AMAZON.NoIntent': function(){
         this.emit(':tell', 'See you later.');
+    },
+    'AMAZON.HelpIntent': function () {
+        this.emit(':ask', "I just played some clips for you. Would you like to hear more?", 
+                        "Would you like to hear more?");
     },
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
@@ -357,23 +371,31 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
     },
     'SessionEndedRequest': function () {
         console.log(`Session ended in learn state: ${this.event.request.reason}`);
-    },
+    }
 });
 
-
 const helpStateHandlers = Alexa.CreateStateHandler(GAME_STATES.HELP, {
-    'helpUser': function(inGame){
+    'helpUser': function(){
+        var response = "";
+        var repeat = "";
         if(inGame){
-            this.emit(':ask', 'All you have to do is wait for me to play a piano note. ' + 
+            response = 'All you have to do is wait for me to play a piano note. ' + 
                             'Then when it stops playing, give your answer or say that you don\'t know. ' + 
-                            'Would you like to keep playing?', 'Would you like to keep playing?');
+                            'Would you like to keep playing?';
+            repeat = 'Would you like to play?';
         }else{
-            this.emit(':ask', 'The game has not started yet. Would you like to play?', 'Would you like to play?');
+            response = 'The game has not started yet. Would you like to play?';
+            repeat = 'Would you like to play?';
         }
+        this.emit(':ask', response, repeat);
     },
     'AMAZON.YesIntent': function(){
-        this.handler.state = GAME_STATES.TRIVIA;
-        this.emit(':ask', this.attributes['repromptText'], this.attributes['repromptText']);
+        this.handler.state = GAME_STATES.GAME;
+        if(inGame){
+            this.emit(':ask', this.attributes['repromptText'], this.attributes['repromptText']);
+        }else{
+            this.emitWithState('PlayGame', false);
+        }
     },
     'AMAZON.NoIntent': function(){
         this.emit(':tell', 'See you.');
@@ -381,8 +403,8 @@ const helpStateHandlers = Alexa.CreateStateHandler(GAME_STATES.HELP, {
     'AMAZON.StopIntent': function () {
         this.emit(':tell', 'See you.');
     },
-    'AMAZON.CancelIntent': function () {
-        this.emit(':tell', 'See you later.');
+    'AMAZON.HelpIntent': function () {
+        this.emitWithState('helpUser');
     },
     'Unhandled': function () {
         console.log('unhandled in help');
