@@ -10,7 +10,7 @@ const GAME_STATES = {
     SELECT: '_SELECTION' // For selecting game type
 };
 
-const APP_ID = undefined; // TODO replace with your app ID (OPTIONAL)
+const APP_ID = 'amzn1.ask.skill.e1753e4d-c3e0-449e-9a83-e399db81f64b';
 
 var clips = require('./clips').clips;
 
@@ -83,9 +83,12 @@ function handleUserGuess(userDoesntKnow){
         if(nHarmonic != ''){
             response += ' or ' + nHarmonic + '. ';
         }
-        speech.say(response)
+
+        if(clipsPlayed < gameLength){
+            speech.say(response)
               .pause('1s')
               .say("Maybe you will know this one.");
+        }
 
     }else{ //user answered, so check it
 
@@ -274,7 +277,7 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
               .say("Here comes your first one.")
               .pause('1s');
         }else{
-            speech.say("Since you're playing again. I'll through sharps and flats into the mix");
+            speech.say("Since you're playing again. I will through sharps and flats into the mix.");
         }
 
         var notes = 0;
