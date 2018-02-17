@@ -202,6 +202,9 @@ const gameSelectionHandlers = Alexa.CreateStateHandler(GAME_STATES.SELECT, {
     'AMAZON.StopIntent': function(){
         this.emit(':tell', 'See you later.');
     },
+    'AMAZON.CancelIntent': function () {
+        this.emit(':tell', 'See you.');
+    },
     'Unhandled': function () {
         this.emit(':ask', 'Just say Learn or Game.', 'Just say Learn or Game.');
         console.log('unhandled from select state');
@@ -275,6 +278,9 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
     'AMAZON.StopIntent': function () {
         console.log('game stopped');
         this.emit(':tell', 'See you later.');
+    },
+    'AMAZON.CancelIntent': function () {
+        this.emit(':tell', 'See you.');
     },
     'Unhandled': function () {
         console.log('unhandled from game state');
@@ -367,6 +373,9 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
         console.log('game stopped');
         this.emit(':tell', 'See you later.');
     },
+    'AMAZON.CancelIntent': function () {
+        this.emit(':tell', 'See you.');
+    },
     'Unhandled': function () {
         console.log('unhandled from learn state');
         this.emit(':tell', 'See you later.');
@@ -404,6 +413,9 @@ const helpStateHandlers = Alexa.CreateStateHandler(GAME_STATES.HELP, {
         this.emit(':tell', 'See you.');
     },
     'AMAZON.StopIntent': function () {
+        this.emit(':tell', 'See you.');
+    },
+    'AMAZON.CancelIntent': function () {
         this.emit(':tell', 'See you.');
     },
     'AMAZON.HelpIntent': function () {
