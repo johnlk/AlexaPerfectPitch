@@ -278,6 +278,7 @@ const gameStateHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME, {
     },
     'Unhandled': function () {
         console.log('unhandled from game state');
+        this.emit(':tell', 'See you later.');
     },
     'SessionEndedRequest': function () {
         console.log(`Session ended in game state: ${this.event.request.reason}`);
@@ -368,6 +369,7 @@ const learnStateHanders = Alexa.CreateStateHandler(GAME_STATES.LEARN, {
     },
     'Unhandled': function () {
         console.log('unhandled from learn state');
+        this.emit(':tell', 'See you later.');
     },
     'SessionEndedRequest': function () {
         console.log(`Session ended in learn state: ${this.event.request.reason}`);
@@ -384,17 +386,18 @@ const helpStateHandlers = Alexa.CreateStateHandler(GAME_STATES.HELP, {
                             'Would you like to keep playing?';
             repeat = 'Would you like to play?';
         }else{
-            response = 'The game has not started yet. Would you like to play?';
-            repeat = 'Would you like to play?';
+            response = 'The game has not started yet. Would you like to hear about the two game modes?';
+            repeat = 'Would you like to play the game?';
         }
         this.emit(':ask', response, repeat);
     },
     'AMAZON.YesIntent': function(){
-        this.handler.state = GAME_STATES.GAME;
         if(inGame){
+            this.handler.state = GAME_STATES.GAME;
             this.emit(':ask', this.attributes['repromptText'], this.attributes['repromptText']);
         }else{
-            this.emitWithState('PlayGame', false);
+            this.handler.state = GAME_STATES.SELECT;
+            this.emitWithState('StartSkill', false);
         }
     },
     'AMAZON.NoIntent': function(){
@@ -408,7 +411,7 @@ const helpStateHandlers = Alexa.CreateStateHandler(GAME_STATES.HELP, {
     },
     'Unhandled': function () {
         console.log('unhandled in help');
-        // this.emit('ask:', 'Please say that again');
+        this.emit(':ask', 'Would you like to play?', 'Would you like to play?');
     },
     'SessionEndedRequest': function () {
         console.log(`Session ended in help state: ${this.event.request.reason}`);
